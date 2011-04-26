@@ -1,9 +1,9 @@
 import pyscad
 
 # Utility functions for adding modifiers and primitives to the Model class.
-def make_modifier(mod):
+def make_modifier(name):
 	def f(model, *args, **kwargs):
-		model.add(mod(*args, **kwargs))
+		model.add(pyscad.SCADObject(name, *args, **kwargs))
 	def g(self, *args, **kwargs):
 		self.push(f, *args, **kwargs)
 		return self
@@ -73,13 +73,13 @@ class Model(object):
 		return objects[0]
 	
 	# Boolean operators.
-	intersection = make_modifier(pyscad.intersection)
-	union = make_modifier(pyscad.union)
-	difference = make_modifier(pyscad.difference)
+	intersection = make_modifier("intersection")
+	union = make_modifier("union")
+	difference = make_modifier("difference")
 	
 	# Transforms.
-	scale = make_modifier(pyscad.scale)
-	translate = make_modifier(pyscad.translate)
+	scale = make_modifier("scale")
+	translate = make_modifier("translate")
 	
 	# Primitives.
 	cube = make_primitive(pyscad.cube)
