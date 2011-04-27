@@ -80,6 +80,8 @@ class Model(object):
 	# Transforms.
 	scale = make_modifier("scale")
 	translate = make_modifier("translate")
+	rotate = make_modifier("rotate")
+	mirror = make_modifier("mirror")
 	
 	# Primitives.
 	cube = make_primitive(pyscad.cube)
