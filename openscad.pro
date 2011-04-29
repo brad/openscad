@@ -38,11 +38,10 @@ win32:DEFINES += _USE_MATH_DEFINES NOMINMAX _CRT_SECURE_NO_WARNINGS
 #disable warning about too long decorated names
 win32:QMAKE_CXXFLAGS += -wd4503
 
+TEMPLATE = app
 python{
-	TEMPLATE = lib
 	SOURCES += src/python.cc
-}else{
-	TEMPLATE = app
+    include(python.pri)
 }
 
 RESOURCES = openscad.qrc

@@ -73,6 +73,8 @@
 #include "qlanguagefactory.h"
 #endif
 
+#include "Python.h"
+
 #ifdef ENABLE_CGAL
 
 #if 1
@@ -602,7 +604,57 @@ void MainWindow::compile(bool procevents)
 	root_ctx.set_variable("$vpr", vpr);
 
 	// Parse
-	last_compiled_doc = editor->toPlainText();
+	QString editor_text = editor->toPlainText();
+	QString output = editor_text;
+	if(editor_text.indexOf(";") == -1) {
+		PyObject* evalModule;
+		PyObject* evalDict;
+		PyObject* evalVal;
+
+		QString input = "from pyscad_script import Model\n"
+"model = Model()\n"
+"def union():\n"
+"	return model.union()\n"
+"def translate(t):\n"
+"	return model.translate(t)\n"
+"def rotate(r):\n"
+"	return model.rotate(r)\n"
+"def scale(s):\n"
+"	return model.scale(s)\n"
+"def cube(c):\n"
+"	return model.cube(c)\n"
+"def sphere(s):\n"
+"	return model.sphere(s)\n"
+"def cylinder(c):\n"
+"	return model.cylinder(c)\n"
+"def get_object():\n"
+"	return model.get_object()\n";
+        input.append(editor_text);
+        input.append("\nresult = get_object().to_source()");
+
+        char pySearchPath[] = "/usr/";
+        Py_SetPythonHome(pySearchPath);
+
+        Py_Initialize();
+
+        QByteArray ia = input.toLatin1();
+		PyRun_SimpleString(ia.data());
+
+		evalModule = PyImport_AddModule( (char*)"__main__" );
+		evalDict = PyModule_GetDict( evalModule );
+		evalVal = PyDict_GetItemString( evalDict, "result" );
+
+		if( evalVal == NULL ) {
+			PyErr_Print();
+		} else {
+			output = PyString_AsString( evalVal );
+		}
+
+        Py_Finalize();
+	}
+
+	// Use output of python to compile
+	last_compiled_doc = output;
 	root_module = parse((last_compiled_doc + "\n" + commandline_commands).toAscii().data(), this->fileName.isEmpty() ? "" : QFileInfo(this->fileName).absolutePath().toLocal8Bit(), false);
 
 	// Error highlighting
