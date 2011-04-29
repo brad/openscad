@@ -3,3 +3,4 @@
 objects/*
 .project
 .pydevproject
+Makefile
